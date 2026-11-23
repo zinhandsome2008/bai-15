@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5 - Quản lý sản phẩm và tính tiền</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f5f5f5;
+        }
+        .hop {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #cccccc;
+            max-width: 650px;
+        }
+        input, button {
+            padding: 6px;
+            margin: 5px;
+        }
+        button { cursor: pointer; }
+        table { border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid black; padding: 8px; }
+        #ketQua { color: blue; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+    <div class="hop">
+        <h2>Bài 5: Quản lý sản phẩm và tính tiền</h2>
+        <h3>1. Danh sách sản phẩm</h3>
+        <label>Tên sản phẩm:</label>
+        <input type="text" id="ten" placeholder="Nhập tên">
+        <br>
+        <label>Đơn giá:</label>
+        <input type="number" id="gia" placeholder="Nhập giá" min="1">
+        <button onclick="themSanPham()">Thêm sản phẩm</button>
+        <table>
+            <thead>
+                <tr><th>STT</th><th>Tên sản phẩm</th><th>Đơn giá</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody id="bangSanPham"></tbody>
+        </table>
+
+        <h3>2. Tính tiền bán hàng (VAT 10%)</h3>
+        <p>Chọn sản phẩm và nhập số lượng muốn mua.</p>
+        <table>
+            <thead>
+                <tr><th>Mua</th><th>Sản phẩm</th><th>Giá</th><th>Số lượng</th></tr>
+            </thead>
+            <tbody id="bangMuaHang"></tbody>
+        </table>
+        <br>
+        <button onclick="tinhTien()">Tính tiền</button>
+        <p id="ketQua"></p>
+    </div>
+
+    <script>
+        // Tạo danh sách sản phẩm ban đầu
+        let danhSach = [
+            { ten: "Sách", gia: 30000 },
+            { ten: "Vở", gia: 10000 },
+            { ten: "Bút", gia: 5000 }
+        ];
+
+        // Hiển thị danh sách sản phẩm và bảng mua hàng
+        function hienThi() {
+            let bang1 = document.getElementById("bangSanPham");
+            let bang2 = document.getElementById("bangMuaHang");
+            bang1.innerHTML = "";
+            bang2.innerHTML = "";
+
+            for (let i = 0; i < danhSach.length; i++) {
+                let sanPham = danhSach[i];
+
+                let dong1 = bang1.insertRow();
+                dong1.insertCell().innerText = i + 1;
+                dong1.insertCell().innerText = sanPham.ten;
+                dong1.insertCell().innerText = sanPham.gia + " VNĐ";
+
+                let nutSua = document.createElement("button");
+                nutSua.innerText = "Sửa";
+                nutSua.onclick = function () { suaSanPham(i); };
+                dong1.insertCell().appendChild(nutSua);
+
+                let nutXoa = document.createElement("button");
+                nutXoa.innerText = "Xóa";
+                nutXoa.onclick = function () { xoaSanPham(i); };
+                dong1.cells[3].appendChild(nutXoa);
+
+                let dong2 = bang2.insertRow();
+                let oChon = dong2.insertCell();
+                let chon = document.createElement("input");
+                chon.type = "checkbox";
+                chon.id = "chon" + i;
+                oChon.appendChild(chon);
+
+                dong2.insertCell().innerText = sanPham.ten;
+                dong2.insertCell().innerText = sanPham.gia + " VNĐ";
+
+                let soLuong = document.createElement("input");
+                soLuong.type = "number";
+                soLuong.min = "1";
+                soLuong.value = "1";
+                soLuong.id = "soLuong" + i;
+                soLuong.style.width = "55px";
+                dong2.insertCell().appendChild(soLuong);
+            }
+        }
+
+        function themSanPham() {
+            let ten = document.getElementById("ten").value.trim();
+            let gia = Number(document.getElementById("gia").value);
+
+            if (ten === "" || document.getElementById("gia").value === "" || !Number.isFinite(gia) || gia <= 0) {
+                alert("Hãy nhập tên và giá sản phẩm hợp lệ!");
+                return;
+            }
+
+            danhSach.push({ ten: ten, gia: gia });
+            document.getElementById("ten").value = "";
+            document.getElementById("gia").value = "";
+            document.getElementById("ketQua").innerText = "Đã thêm sản phẩm.";
+            hienThi();
+        }
+
+        function suaSanPham(i) {
+            let tenMoi = prompt("Nhập tên sản phẩm mới:", danhSach[i].ten);
+            if (tenMoi === null) return;
+            tenMoi = tenMoi.trim();
+            if (tenMoi === "") {
+                alert("Tên sản phẩm không được để trống!");
+                return;
+            }
+
+            let giaMoi = prompt("Nhập giá mới:", danhSach[i].gia);
+            if (giaMoi === null) return;
+            if (giaMoi.trim() === "" || !Number.isFinite(Number(giaMoi)) || Number(giaMoi) <= 0) {
+                alert("Giá phải lớn hơn 0!");
+                return;
+            }
+
+            danhSach[i].ten = tenMoi;
+            danhSach[i].gia = Number(giaMoi);
+            hienThi();
+        }
+
+        function xoaSanPham(i) {
+            if (confirm("Bạn muốn xóa sản phẩm này?")) {
+                danhSach.splice(i, 1);
+                hienThi();
+            }
+        }
+
+        function tinhTien() {
+            let tong = 0;
+            let daChon = false;
+            for (let i = 0; i < danhSach.length; i++) {
+                let chon = document.getElementById("chon" + i).checked;
+                if (chon) {
+                    daChon = true;
+                    let nhap = document.getElementById("soLuong" + i);
+                    let soLuong = Number(nhap.value);
+                    if (nhap.value === "" || !Number.isInteger(soLuong) || soLuong <= 0) {
+                        document.getElementById("ketQua").innerText = "Số lượng phải là số nguyên lớn hơn 0!";
+                        return;
+                    }
+                    tong = tong + danhSach[i].gia * soLuong;
+                }
+            }
+
+            if (!daChon) {
+                document.getElementById("ketQua").innerText = "Bạn chưa chọn sản phẩm nào!";
+                return;
+            }
+
+            let vat = tong * 0.1;
+            let thanhTien = tong + vat;
+            document.getElementById("ketQua").innerText =
+                "Tiền hàng: " + tong + " VNĐ; VAT (10%): " + vat +
+                " VNĐ; Tổng tiền: " + thanhTien + " VNĐ.";
+        }
+
+        // Gọi hàm khi mở trang
+        hienThi();
+    </script>
+</body>
+</html>
